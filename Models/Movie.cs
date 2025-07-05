@@ -10,7 +10,7 @@ namespace MovieApi.Models
         public string Genre { get; set; }
         public int Duration { get; set; }
         // Navigation properties
-        public ICollection<Review> Reviews { get; set; } = new List<Review>();
+        public ICollection<MovieReview> Reviews { get; set; } = new List<MovieReview>();
         // One-to-One relationship with MovieDetails
         public MovieDetails MovieDetails { get; set; }
         // Many-to-Many relationship with Actor
