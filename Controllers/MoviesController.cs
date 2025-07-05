@@ -144,10 +144,22 @@ namespace MovieApi.Controllers
         }
 
         // POST: api/Movies
-        // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
+        // This allows to send a json with movie details to create a new movie
+        // and store it in the database. It then returns the created movie with a 201 status code.
         [HttpPost]
-        public async Task<ActionResult<Movie>> PostMovie(Movie movie)
+        public async Task<ActionResult<Movie>> PostMovie([FromBody] MovieCreateDto dto)
         {
+            if (!ModelState.IsValid)
+                return BadRequest(ModelState);
+
+            var movie = new Movie
+            {
+                Title = dto.Title,
+                Year = dto.Year,
+                Genre = dto.Genre,
+                Duration = dto.Duration
+            };
+
             _context.Movie.Add(movie);
             await _context.SaveChangesAsync();
 
