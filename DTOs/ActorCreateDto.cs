@@ -2,6 +2,7 @@ using System.ComponentModel.DataAnnotations;
 
 namespace MovieApi.DTOs
 {
+    // DTO for creating new actor
     public class ActorCreateDto
     {
         [Required]
