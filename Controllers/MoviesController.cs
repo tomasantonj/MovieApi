@@ -113,16 +113,31 @@ namespace MovieApi.Controllers
         }
 
         // PUT: api/Movies/5
-        // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
+        // Updates Movie through the MovieUpdateDTO and returns 204 No Content if successful.
+        // TODO: Maybe respond with a 200 OK and show the updated movie?
         [HttpPut("{id}")]
-        public async Task<IActionResult> PutMovie(int id, Movie movie)
+        public async Task<IActionResult> PutMovie(int id, [FromBody] MovieUpdateDto dto)
         {
-            if (id != movie.Id)
+            if (id != dto.Id)
             {
                 return BadRequest();
             }
 
-            _context.Entry(movie).State = EntityState.Modified;
+            if (!ModelState.IsValid)
+            {
+                return BadRequest(ModelState);
+            }
+
+            var movie = await _context.Movie.FindAsync(id);
+            if (movie == null)
+            {
+                return NotFound();
+            }
+
+            movie.Title = dto.Title;
+            movie.Year = dto.Year;
+            movie.Genre = dto.Genre;
+            movie.Duration = dto.Duration;
 
             try
             {
