@@ -181,6 +181,30 @@ namespace MovieApi.Controllers
             return CreatedAtAction("GetMovie", new { id = movie.Id }, movie);
         }
 
+        // POST: api/Movies/{movieId}/actors/{actorId}
+        // This allows us to add an actor to a movie by their respective IDs
+        [HttpPost("{movieId}/actors/{actorId}")]
+        public async Task<IActionResult> AddActorToMovie(int movieId, int actorId)
+        {
+            var movie = await _context.Movie.FindAsync(movieId);
+            if (movie == null)
+                return NotFound($"Movie with id {movieId} not found.");
+
+            var actor = await _context.Actor.FindAsync(actorId);
+            if (actor == null)
+                return NotFound($"Actor with id {actorId} not found.");
+
+            bool alreadyExists = await _context.MovieActor.AnyAsync(ma => ma.MovieId == movieId && ma.ActorId == actorId);
+            if (alreadyExists)
+                return Conflict($"Actor with id {actorId} is already associated with movie {movieId}.");
+
+            var movieActor = new MovieActor { MovieId = movieId, ActorId = actorId };
+            _context.MovieActor.Add(movieActor);
+            await _context.SaveChangesAsync();
+
+            return NoContent();
+        }
+
         // DELETE: api/Movies/5
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteMovie(int id)

@@ -74,10 +74,18 @@ namespace MovieApi.Controllers
         }
 
         // POST: api/Actors
-        // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
+        // This lets us create new actors by sending a JSON object with the actor's name.
         [HttpPost]
-        public async Task<ActionResult<Actor>> PostActor(Actor actor)
+        public async Task<ActionResult<Actor>> PostActor([FromBody] DTOs.ActorCreateDto dto)
         {
+            if (!ModelState.IsValid)
+                return BadRequest(ModelState);
+
+            var actor = new Actor
+            {
+                Name = dto.Name
+            };
+
             _context.Actor.Add(actor);
             await _context.SaveChangesAsync();
 
