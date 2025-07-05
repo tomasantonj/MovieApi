@@ -23,6 +23,7 @@ namespace MovieApi.Controllers
         }
 
         // GET: api/MovieReviews
+        // Returns a list of all movie reviews with related movie details
         [HttpGet]
         public async Task<ActionResult<IEnumerable<ReviewDto>>> GetMovieReview()
         {
@@ -43,6 +44,7 @@ namespace MovieApi.Controllers
         }
 
         // GET: api/MovieReviews/5
+        // Returns a specific movie review by ID with related movie details
         [HttpGet("{id}")]
         public async Task<ActionResult<ReviewDto>> GetMovieReview(int id)
         {
@@ -71,15 +73,33 @@ namespace MovieApi.Controllers
         }
 
         // PUT: api/MovieReviews/5
+        // Endpoint that updates an existing movie review
         [HttpPut("{id}")]
-        public async Task<IActionResult> PutMovieReview(int id, MovieReview movieReview)
+        public async Task<IActionResult> PutMovieReview(int id, ReviewUpdateDto updateDto)
         {
-            if (id != movieReview.Id)
+            if (id != updateDto.Id)
             {
                 return BadRequest();
             }
 
-            _context.Entry(movieReview).State = EntityState.Modified;
+            var movieReview = await _context.MovieReview.FindAsync(id);
+            if (movieReview == null)
+            {
+                return NotFound();
+            }
+
+            // Optionally validate that the referenced Movie exists
+            var movieExists = await _context.Movie.AnyAsync(m => m.Id == updateDto.MovieId);
+            if (!movieExists)
+            {
+                return BadRequest($"Movie with Id {updateDto.MovieId} does not exist.");
+            }
+
+            // Update allowed fields
+            movieReview.ReviewerName = updateDto.ReviewerName;
+            movieReview.Rating = updateDto.Rating;
+            movieReview.Comment = updateDto.Comment;
+            movieReview.MovieId = updateDto.MovieId;
 
             try
             {

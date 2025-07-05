@@ -53,6 +53,7 @@ namespace MovieApi.Controllers
         }
 
         // GET: api/Movies/{movieId}/reviews
+        // Returns a list of reviews for a specific movie
         [HttpGet("{movieId}/reviews")]
         public async Task<ActionResult<IEnumerable<ReviewDto>>> GetReviewsForMovie(int movieId)
         {
@@ -121,7 +122,6 @@ namespace MovieApi.Controllers
 
         // PUT: api/Movies/5
         // Updates Movie through the MovieUpdateDTO and returns 204 No Content if successful.
-        // TODO: Maybe respond with a 200 OK and show the updated movie?
         [HttpPut("{id}")]
         public async Task<IActionResult> PutMovie(int id, [FromBody] MovieUpdateDto dto)
         {
@@ -213,6 +213,7 @@ namespace MovieApi.Controllers
         }
 
         // DELETE: api/Movies/5
+        // returns 204 No Content if the movie is successfully deleted.
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteMovie(int id)
         {
