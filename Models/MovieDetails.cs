@@ -7,6 +7,6 @@ namespace MovieApi.Models
         public Movie Movie { get; set; }
         public string Synopsis { get; set; }
         public string Language { get; set; }
-        public decimal Budget { get; set; }
+        public int Budget { get; set; }
     }
 }
