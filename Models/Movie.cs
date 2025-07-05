@@ -16,4 +16,12 @@ namespace MovieApi.Models
         // Many-to-Many relationship with Actor
         public ICollection<MovieActor> MovieActors { get; set; } = new List<MovieActor>();
     }
+    public class MovieActor
+    {
+        public int Id { get; set; } 
+        public int MovieId { get; set; }
+        public Movie Movie { get; set; }
+        public int ActorId { get; set; }
+        public Actor Actor { get; set; }
+    }
 }
