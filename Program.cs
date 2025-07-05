@@ -1,7 +1,7 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using MovieApi.Data;
-
+using MovieApi.Extensions;
 
 namespace MovieApi
 {
@@ -22,7 +22,7 @@ namespace MovieApi
             var app = builder.Build();
 
             // Seed the database
-
+            app.Seed(); 
 
             // Configure the HTTP request pipeline.
             if (app.Environment.IsDevelopment())
