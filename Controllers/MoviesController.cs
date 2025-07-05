@@ -23,10 +23,19 @@ namespace MovieApi.Controllers
         }
 
         // GET: api/Movies
+        // Supports optional filtering by genre and year using FromQuery
+        // Genre and year are both optional so you can use them separetely or together
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<Movie>>> GetMovie()
+        public async Task<ActionResult<IEnumerable<Movie>>> GetMovie([FromQuery] string? genre, [FromQuery] int? year)
         {
-            return await _context.Movie.ToListAsync();
+            var query = _context.Movie.AsQueryable();
+
+            if (!string.IsNullOrEmpty(genre))
+                query = query.Where(m => m.Genre == genre);
+            if (year.HasValue)
+                query = query.Where(m => m.Year == year.Value);
+
+            return await query.ToListAsync();
         }
 
         // GET: api/Movies/5
@@ -65,51 +74,49 @@ namespace MovieApi.Controllers
         }
 
         // GET: api/Movies/{id}/details
+        // Returns a MovieDetailDto using LINQ and Select
         [HttpGet("{id}/details")]
         public async Task<ActionResult<MovieDetailDto>> GetMovieDetails(int id)
         {
-            var movie = await _context.Movie
-                .Include(m => m.MovieDetails)
-                .Include(m => m.MovieActors).ThenInclude(ma => ma.Actor)
-                .Include(m => m.Reviews)
-                .FirstOrDefaultAsync(m => m.Id == id);
+            var movieDetail = await _context.Movie
+                .Where(m => m.Id == id)
+                .Select(m => new MovieDetailDto
+                {
+                    Id = m.Id,
+                    Title = m.Title,
+                    Year = m.Year,
+                    Genre = m.Genre,
+                    Duration = m.Duration,
+                    MovieDetails = m.MovieDetails == null ? null : new MovieDetailsDto
+                    {
+                        Synopsis = m.MovieDetails.Synopsis,
+                        Language = m.MovieDetails.Language,
+                        Budget = m.MovieDetails.Budget
+                    },
+                    Reviews = m.Reviews.Select(r => new ReviewDto
+                    {
+                        ReviewerName = r.ReviewerName,
+                        Rating = r.Rating,
+                        Comment = r.Comment,
+                        MovieTitle = m.Title,
+                        MovieYear = m.Year,
+                        MovieGenre = m.Genre,
+                        MovieDuration = m.Duration
+                    }).ToList(),
+                    Actors = m.MovieActors.Select(ma => new ActorDto
+                    {
+                        Id = ma.Actor.Id,
+                        Name = ma.Actor.Name
+                    }).ToList()
+                })
+                .FirstOrDefaultAsync();
 
-            if (movie == null)
+            if (movieDetail == null)
             {
                 return NotFound();
             }
 
-            var dto = new MovieDetailDto
-            {
-                Id = movie.Id,
-                Title = movie.Title,
-                Year = movie.Year,
-                Genre = movie.Genre,
-                Duration = movie.Duration,
-                MovieDetails = movie.MovieDetails == null ? null : new MovieDetailsDto
-                {
-                    Synopsis = movie.MovieDetails.Synopsis,
-                    Language = movie.MovieDetails.Language,
-                    Budget = movie.MovieDetails.Budget
-                },
-                Reviews = movie.Reviews.Select(r => new ReviewDto
-                {
-                    ReviewerName = r.ReviewerName,
-                    Rating = r.Rating,
-                    Comment = r.Comment,
-                    MovieTitle = movie.Title,
-                    MovieYear = movie.Year,
-                    MovieGenre = movie.Genre,
-                    MovieDuration = movie.Duration
-                }).ToList(),
-                Actors = movie.MovieActors.Select(ma => new ActorDto
-                {
-                    Id = ma.Actor.Id,
-                    Name = ma.Actor.Name
-                }).ToList()
-            };
-
-            return dto;
+            return movieDetail;
         }
 
         // PUT: api/Movies/5
