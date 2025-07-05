@@ -1,7 +1,6 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
-using MovieApi.Data;
-using MovieApi.Extensions;
+
 
 namespace MovieApi
 {
@@ -10,8 +9,6 @@ namespace MovieApi
         public static void Main(string[] args)
         {
             var builder = WebApplication.CreateBuilder(args);
-            builder.Services.AddDbContext<MovieApiContext>(options =>
-                options.UseSqlServer(builder.Configuration.GetConnectionString("MovieApiContext") ?? throw new InvalidOperationException("Connection string 'MovieApiContext' not found.")));
 
             // Add services to the container.
 
@@ -22,12 +19,7 @@ namespace MovieApi
             var app = builder.Build();
 
             // Seed the database
-            using (var scope = app.Services.CreateScope())
-            {
-                var services = scope.ServiceProvider;
-                var context = services.GetRequiredService<MovieApiContext>();
-                SeedData.Initialize(context);
-            }
+
 
             // Configure the HTTP request pipeline.
             if (app.Environment.IsDevelopment())
