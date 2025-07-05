@@ -64,6 +64,54 @@ namespace MovieApi.Controllers
             return reviews;
         }
 
+        // GET: api/Movies/{id}/details
+        [HttpGet("{id}/details")]
+        public async Task<ActionResult<MovieDetailDto>> GetMovieDetails(int id)
+        {
+            var movie = await _context.Movie
+                .Include(m => m.MovieDetails)
+                .Include(m => m.MovieActors).ThenInclude(ma => ma.Actor)
+                .Include(m => m.Reviews)
+                .FirstOrDefaultAsync(m => m.Id == id);
+
+            if (movie == null)
+            {
+                return NotFound();
+            }
+
+            var dto = new MovieDetailDto
+            {
+                Id = movie.Id,
+                Title = movie.Title,
+                Year = movie.Year,
+                Genre = movie.Genre,
+                Duration = movie.Duration,
+                MovieDetails = movie.MovieDetails == null ? null : new MovieDetailsDto
+                {
+                    Synopsis = movie.MovieDetails.Synopsis,
+                    Language = movie.MovieDetails.Language,
+                    Budget = movie.MovieDetails.Budget
+                },
+                Reviews = movie.Reviews.Select(r => new ReviewDto
+                {
+                    ReviewerName = r.ReviewerName,
+                    Rating = r.Rating,
+                    Comment = r.Comment,
+                    MovieTitle = movie.Title,
+                    MovieYear = movie.Year,
+                    MovieGenre = movie.Genre,
+                    MovieDuration = movie.Duration
+                }).ToList(),
+                Actors = movie.MovieActors.Select(ma => new ActorDto
+                {
+                    Id = ma.Actor.Id,
+                    Name = ma.Actor.Name
+                }).ToList()
+            };
+
+            return dto;
+        }
+
         // PUT: api/Movies/5
         // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [HttpPut("{id}")]
