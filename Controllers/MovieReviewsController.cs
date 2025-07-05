@@ -7,6 +7,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using MovieApi.Data;
 using MovieApi.Models;
+using MovieApi.DTOs;
 
 namespace MovieApi.Controllers
 {
@@ -23,27 +24,53 @@ namespace MovieApi.Controllers
 
         // GET: api/MovieReviews
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<MovieReview>>> GetMovieReview()
+        public async Task<ActionResult<IEnumerable<ReviewDto>>> GetMovieReview()
         {
-            return await _context.MovieReview.ToListAsync();
+            var reviews = await _context.MovieReview
+                .Include(r => r.Movie)
+                .Select(r => new ReviewDto
+                {
+                    ReviewerName = r.ReviewerName,
+                    Rating = r.Rating,
+                    Comment = r.Comment,
+                    MovieTitle = r.Movie != null ? r.Movie.Title : null,
+                    MovieYear = r.Movie != null ? r.Movie.Year : null,
+                    MovieGenre = r.Movie != null ? r.Movie.Genre : null,
+                    MovieDuration = r.Movie != null ? r.Movie.Duration : null
+                })
+                .ToListAsync();
+            return reviews;
         }
 
         // GET: api/MovieReviews/5
         [HttpGet("{id}")]
-        public async Task<ActionResult<MovieReview>> GetMovieReview(int id)
+        public async Task<ActionResult<ReviewDto>> GetMovieReview(int id)
         {
-            var movieReview = await _context.MovieReview.FindAsync(id);
+            var r = await _context.MovieReview
+                .Include(r => r.Movie)
+                .FirstOrDefaultAsync(r => r.Id == id);
 
-            if (movieReview == null)
+            if (r == null)
             {
                 return NotFound();
             }
-
-            return movieReview;
+            // TODO: REVIEW IF THIS SHOULD BE INCLUDED IN THE REVIEW DTO
+            // PROBABLY NOT AS ITS A NOT RELATED TO THE REVIEW ITSELF
+            // BUT COULD BE USEFUL FOR DISPLAYING MOVIE DETAILS ON THE REVIEW VIEW
+            var dto = new ReviewDto
+            {
+                ReviewerName = r.ReviewerName,
+                Rating = r.Rating,
+                Comment = r.Comment,
+                MovieTitle = r.Movie != null ? r.Movie.Title : null,
+                MovieYear = r.Movie != null ? r.Movie.Year : null,
+                MovieGenre = r.Movie != null ? r.Movie.Genre : null,
+                MovieDuration = r.Movie != null ? r.Movie.Duration : null
+            };
+            return dto;
         }
 
         // PUT: api/MovieReviews/5
-        // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [HttpPut("{id}")]
         public async Task<IActionResult> PutMovieReview(int id, MovieReview movieReview)
         {
@@ -74,7 +101,6 @@ namespace MovieApi.Controllers
         }
 
         // POST: api/MovieReviews
-        // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [HttpPost]
         public async Task<ActionResult<MovieReview>> PostMovieReview(MovieReview movieReview)
         {

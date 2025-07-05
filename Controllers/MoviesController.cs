@@ -7,6 +7,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using MovieApi.Data;
 using MovieApi.Models;
+using MovieApi.DTOs;
 
 namespace MovieApi.Controllers
 {
@@ -40,6 +41,27 @@ namespace MovieApi.Controllers
             }
 
             return movie;
+        }
+
+        // GET: api/Movies/{movieId}/reviews
+        [HttpGet("{movieId}/reviews")]
+        public async Task<ActionResult<IEnumerable<ReviewDto>>> GetReviewsForMovie(int movieId)
+        {
+            var reviews = await _context.MovieReview
+                .Where(r => r.MovieId == movieId)
+                .Include(r => r.Movie)
+                .Select(r => new ReviewDto
+                {
+                    ReviewerName = r.ReviewerName,
+                    Rating = r.Rating,
+                    Comment = r.Comment,
+                    MovieTitle = r.Movie != null ? r.Movie.Title : null,
+                    MovieYear = r.Movie != null ? r.Movie.Year : null,
+                    MovieGenre = r.Movie != null ? r.Movie.Genre : null,
+                    MovieDuration = r.Movie != null ? r.Movie.Duration : null
+                })
+                .ToListAsync();
+            return reviews;
         }
 
         // PUT: api/Movies/5
