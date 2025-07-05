@@ -13,7 +13,7 @@ namespace MovieApi.Data
                 return; // DB has been seeded
 
             var actors = new List<Actor>
-            {
+            {   
                 new Actor { Name = "Leonardo DiCaprio" },
                 new Actor { Name = "Kate Winslet" },
                 new Actor { Name = "Brad Pitt" }
