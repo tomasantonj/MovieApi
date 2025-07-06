@@ -4,7 +4,7 @@
 -- Move to ActorsController? 
 
 ## Todo
-- Normalize the Movie table by breaking out the genre and director into separate tables
+- Normalize the Movie table by breaking out the director into separate tables
 
 
 ### extras 1
