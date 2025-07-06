@@ -29,6 +29,7 @@ namespace MovieApi.Controllers
         {
             var reviews = await _context.MovieReview
                 .Include(r => r.Movie)
+                .ThenInclude(m => m.Genre)
                 .Select(r => new ReviewDto
                 {
                     ReviewerName = r.ReviewerName,
@@ -36,7 +37,7 @@ namespace MovieApi.Controllers
                     Comment = r.Comment,
                     MovieTitle = r.Movie != null ? r.Movie.Title : null,
                     MovieYear = r.Movie != null ? r.Movie.Year : null,
-                    MovieGenre = r.Movie != null ? r.Movie.Genre : null,
+                    MovieGenre = r.Movie != null && r.Movie.Genre != null ? r.Movie.Genre.Name : null,
                     MovieDuration = r.Movie != null ? r.Movie.Duration : null
                 })
                 .ToListAsync();
@@ -50,15 +51,13 @@ namespace MovieApi.Controllers
         {
             var r = await _context.MovieReview
                 .Include(r => r.Movie)
+                .ThenInclude(m => m.Genre)
                 .FirstOrDefaultAsync(r => r.Id == id);
 
             if (r == null)
             {
                 return NotFound();
             }
-            // TODO: REVIEW IF THIS SHOULD BE INCLUDED IN THE REVIEW DTO
-            // PROBABLY NOT AS ITS A NOT RELATED TO THE REVIEW ITSELF
-            // BUT COULD BE USEFUL FOR DISPLAYING MOVIE DETAILS ON THE REVIEW VIEW
             var dto = new ReviewDto
             {
                 ReviewerName = r.ReviewerName,
@@ -66,7 +65,7 @@ namespace MovieApi.Controllers
                 Comment = r.Comment,
                 MovieTitle = r.Movie != null ? r.Movie.Title : null,
                 MovieYear = r.Movie != null ? r.Movie.Year : null,
-                MovieGenre = r.Movie != null ? r.Movie.Genre : null,
+                MovieGenre = r.Movie != null && r.Movie.Genre != null ? r.Movie.Genre.Name : null,
                 MovieDuration = r.Movie != null ? r.Movie.Duration : null
             };
             return dto;

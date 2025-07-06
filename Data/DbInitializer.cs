@@ -12,6 +12,17 @@ namespace MovieApi.Data
             if (context.Movie.Any())
                 return; // DB has been seeded
 
+            var genres = new List<Genre>
+            {
+                new Genre { Name = "Sci-Fi" },
+                new Genre { Name = "Romance" },
+                new Genre { Name = "Drama" },
+                new Genre { Name = "Thriller" },
+                new Genre { Name = "Crime" }
+            };
+            context.Genre.AddRange(genres);
+            context.SaveChanges();
+
             var actors = new List<Actor>
             {
                 new Actor { Name = "Leonardo DiCaprio" },
@@ -28,14 +39,14 @@ namespace MovieApi.Data
 
             var movies = new List<Movie>
             {
-                new Movie { Title = "Inception", Year = 2010, Genre = "Sci-Fi", Duration = 148 },
-                new Movie { Title = "Titanic", Year = 1997, Genre = "Romance", Duration = 195 },
-                new Movie { Title = "Fight Club", Year = 1999, Genre = "Drama", Duration = 139 },
-                new Movie { Title = "The Shawshank Redemption", Year = 1994, Genre = "Drama", Duration = 142 },
-                new Movie { Title = "Forrest Gump", Year = 1994, Genre = "Drama", Duration = 142 },
-                new Movie { Title = "Black Swan", Year = 2010, Genre = "Thriller", Duration = 108 },
-                new Movie { Title = "Lost in Translation", Year = 2003, Genre = "Drama", Duration = 102 },
-                new Movie { Title = "Pulp Fiction", Year = 1994, Genre = "Crime", Duration = 154 }
+                new Movie { Title = "Inception", Year = 2010, GenreId = genres.Single(g => g.Name == "Sci-Fi").Id, Duration = 148 },
+                new Movie { Title = "Titanic", Year = 1997, GenreId = genres.Single(g => g.Name == "Romance").Id, Duration = 195 },
+                new Movie { Title = "Fight Club", Year = 1999, GenreId = genres.Single(g => g.Name == "Drama").Id, Duration = 139 },
+                new Movie { Title = "The Shawshank Redemption", Year = 1994, GenreId = genres.Single(g => g.Name == "Drama").Id, Duration = 142 },
+                new Movie { Title = "Forrest Gump", Year = 1994, GenreId = genres.Single(g => g.Name == "Drama").Id, Duration = 142 },
+                new Movie { Title = "Black Swan", Year = 2010, GenreId = genres.Single(g => g.Name == "Thriller").Id, Duration = 108 },
+                new Movie { Title = "Lost in Translation", Year = 2003, GenreId = genres.Single(g => g.Name == "Drama").Id, Duration = 102 },
+                new Movie { Title = "Pulp Fiction", Year = 1994, GenreId = genres.Single(g => g.Name == "Crime").Id, Duration = 154 }
             };
             context.Movie.AddRange(movies);
             context.SaveChanges();

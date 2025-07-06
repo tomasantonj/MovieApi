@@ -7,8 +7,10 @@ namespace MovieApi.Models
         public int Id { get; set; }
         public string Title { get; set; }
         public int Year { get; set; }
-        public string Genre { get; set; }
         public int Duration { get; set; }
+        // Normalized Genre
+        public int GenreId { get; set; }
+        public Genre Genre { get; set; }
         // Navigation properties
         public ICollection<MovieReview> Reviews { get; set; } = new List<MovieReview>();
         // One-to-One relationship with MovieDetails
@@ -16,6 +18,14 @@ namespace MovieApi.Models
         // Many-to-Many relationship with Actor
         public ICollection<MovieActor> MovieActors { get; set; } = new List<MovieActor>();
     }
+
+    public class Genre
+    {
+        public int Id { get; set; }
+        public string Name { get; set; }
+        public ICollection<Movie> Movies { get; set; } = new List<Movie>();
+    }
+
     public class MovieActor
     {
         public int Id { get; set; } 

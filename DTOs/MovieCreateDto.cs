@@ -13,8 +13,7 @@ namespace MovieApi.DTOs
         public int Year { get; set; }
 
         [Required]
-        [StringLength(50)]
-        public string Genre { get; set; } = string.Empty;
+        public int GenreId { get; set; }
 
         [Required]
         [Range(1, 600, ErrorMessage = "Duration must be between 1 and 600 minutes.")]

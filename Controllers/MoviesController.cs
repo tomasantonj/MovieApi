@@ -23,33 +23,51 @@ namespace MovieApi.Controllers
         }
 
         // GET: api/Movies
-        // Supports optional filtering by genre and year using FromQuery
-        // Genre and year are both optional so you can use them separetely or together
+        // Supports optional filtering by genreId and year using FromQuery
+        // GenreId and year are both optional so you can use them separately or together
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<Movie>>> GetMovie([FromQuery] string? genre, [FromQuery] int? year)
+        public async Task<ActionResult<IEnumerable<MovieDto>>> GetMovie([FromQuery] int? genreId, [FromQuery] int? year)
         {
-            var query = _context.Movie.AsQueryable();
+            var query = _context.Movie.Include(m => m.Genre).AsQueryable();
 
-            if (!string.IsNullOrEmpty(genre))
-                query = query.Where(m => m.Genre == genre);
+            if (genreId.HasValue)
+                query = query.Where(m => m.GenreId == genreId.Value);
             if (year.HasValue)
                 query = query.Where(m => m.Year == year.Value);
 
-            return await query.ToListAsync();
+            var movies = await query.Select(m => new MovieDto
+            {
+                Id = m.Id,
+                Title = m.Title,
+                Year = m.Year,
+                GenreId = m.GenreId,
+                GenreName = m.Genre != null ? m.Genre.Name : string.Empty,
+                Duration = m.Duration
+            }).ToListAsync();
+            return movies;
         }
 
         // GET: api/Movies/5
         [HttpGet("{id}")]
-        public async Task<ActionResult<Movie>> GetMovie(int id)
+        public async Task<ActionResult<MovieDto>> GetMovie(int id)
         {
-            var movie = await _context.Movie.FindAsync(id);
+            var movie = await _context.Movie.Include(m => m.Genre).FirstOrDefaultAsync(m => m.Id == id);
 
             if (movie == null)
             {
                 return NotFound();
             }
 
-            return movie;
+            var dto = new MovieDto
+            {
+                Id = movie.Id,
+                Title = movie.Title,
+                Year = movie.Year,
+                GenreId = movie.GenreId,
+                GenreName = movie.Genre != null ? movie.Genre.Name : string.Empty,
+                Duration = movie.Duration
+            };
+            return dto;
         }
 
         // GET: api/Movies/{movieId}/reviews
@@ -67,7 +85,7 @@ namespace MovieApi.Controllers
                     Comment = r.Comment,
                     MovieTitle = r.Movie != null ? r.Movie.Title : null,
                     MovieYear = r.Movie != null ? r.Movie.Year : null,
-                    MovieGenre = r.Movie != null ? r.Movie.Genre : null,
+                    MovieGenre = r.Movie != null ? r.Movie.Genre.Name : null,
                     MovieDuration = r.Movie != null ? r.Movie.Duration : null
                 })
                 .ToListAsync();
@@ -80,13 +98,15 @@ namespace MovieApi.Controllers
         public async Task<ActionResult<MovieDetailDto>> GetMovieDetails(int id)
         {
             var movieDetail = await _context.Movie
+                .Include(m => m.Genre)
                 .Where(m => m.Id == id)
                 .Select(m => new MovieDetailDto
                 {
                     Id = m.Id,
                     Title = m.Title,
                     Year = m.Year,
-                    Genre = m.Genre,
+                    GenreId = m.GenreId,
+                    GenreName = m.Genre != null ? m.Genre.Name : string.Empty,
                     Duration = m.Duration,
                     MovieDetails = m.MovieDetails == null ? null : new MovieDetailsDto
                     {
@@ -101,7 +121,7 @@ namespace MovieApi.Controllers
                         Comment = r.Comment,
                         MovieTitle = m.Title,
                         MovieYear = m.Year,
-                        MovieGenre = m.Genre,
+                        MovieGenre = m.Genre != null ? m.Genre.Name : string.Empty,
                         MovieDuration = m.Duration
                     }).ToList(),
                     Actors = m.MovieActors.Select(ma => new ActorDto
@@ -143,7 +163,7 @@ namespace MovieApi.Controllers
 
             movie.Title = dto.Title;
             movie.Year = dto.Year;
-            movie.Genre = dto.Genre;
+            movie.GenreId = dto.GenreId;
             movie.Duration = dto.Duration;
 
             try
@@ -169,23 +189,37 @@ namespace MovieApi.Controllers
         // This allows to send a json with movie details to create a new movie
         // and store it in the database. It then returns the created movie with a 201 status code.
         [HttpPost]
-        public async Task<ActionResult<Movie>> PostMovie([FromBody] MovieCreateDto dto)
+        public async Task<ActionResult<MovieDto>> PostMovie([FromBody] MovieCreateDto dto)
         {
             if (!ModelState.IsValid)
                 return BadRequest(ModelState);
+
+            var genre = await _context.Genre.FindAsync(dto.GenreId);
+            if (genre == null)
+                return BadRequest($"Genre with id {dto.GenreId} does not exist.");
 
             var movie = new Movie
             {
                 Title = dto.Title,
                 Year = dto.Year,
-                Genre = dto.Genre,
+                GenreId = dto.GenreId,
                 Duration = dto.Duration
             };
 
             _context.Movie.Add(movie);
             await _context.SaveChangesAsync();
 
-            return CreatedAtAction("GetMovie", new { id = movie.Id }, movie);
+            var result = new MovieDto
+            {
+                Id = movie.Id,
+                Title = movie.Title,
+                Year = movie.Year,
+                GenreId = movie.GenreId,
+                GenreName = genre.Name,
+                Duration = movie.Duration
+            };
+
+            return CreatedAtAction("GetMovie", new { id = movie.Id }, result);
         }
 
         // POST: api/Movies/{movieId}/actors/{actorId}
