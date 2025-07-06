@@ -8,10 +8,11 @@ namespace MovieApi.Models
         public string Title { get; set; }
         public int Year { get; set; }
         public int Duration { get; set; }
-        // Normalized Genre
+        // Foreign keys & navigation properties
         public int GenreId { get; set; }
         public Genre Genre { get; set; }
-        // Navigation properties
+        public int DirectorId { get; set; }
+        public Director Director { get; set; }
         public ICollection<MovieReview> Reviews { get; set; } = new List<MovieReview>();
         // One-to-One relationship with MovieDetails
         public MovieDetails MovieDetails { get; set; }

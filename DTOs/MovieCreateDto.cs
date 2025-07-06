@@ -16,6 +16,9 @@ namespace MovieApi.DTOs
         public int GenreId { get; set; }
 
         [Required]
+        public int DirectorId { get; set; }
+
+        [Required]
         [Range(1, 600, ErrorMessage = "Duration must be between 1 and 600 minutes.")]
         public int Duration { get; set; }
     }

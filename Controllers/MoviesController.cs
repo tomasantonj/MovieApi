@@ -23,17 +23,19 @@ namespace MovieApi.Controllers
         }
 
         // GET: api/Movies
-        // Supports optional filtering by genreId and year using FromQuery
-        // GenreId and year are both optional so you can use them separately or together
+        // Supports optional filtering by genreId, year, and directorId using FromQuery
+        // GenreId, year, and directorId are all optional so you can use them separately or together
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<MovieDto>>> GetMovie([FromQuery] int? genreId, [FromQuery] int? year)
+        public async Task<ActionResult<IEnumerable<MovieDto>>> GetMovie([FromQuery] int? genreId, [FromQuery] int? year, [FromQuery] int? directorId)
         {
-            var query = _context.Movie.Include(m => m.Genre).AsQueryable();
+            var query = _context.Movie.Include(m => m.Genre).Include(m => m.Director).AsQueryable();
 
             if (genreId.HasValue)
                 query = query.Where(m => m.GenreId == genreId.Value);
             if (year.HasValue)
                 query = query.Where(m => m.Year == year.Value);
+            if (directorId.HasValue)
+                query = query.Where(m => m.DirectorId == directorId.Value);
 
             var movies = await query.Select(m => new MovieDto
             {
@@ -42,6 +44,8 @@ namespace MovieApi.Controllers
                 Year = m.Year,
                 GenreId = m.GenreId,
                 GenreName = m.Genre != null ? m.Genre.Name : string.Empty,
+                DirectorId = m.DirectorId,
+                DirectorName = m.Director != null ? m.Director.Name : string.Empty,
                 Duration = m.Duration
             }).ToListAsync();
             return movies;
@@ -51,7 +55,7 @@ namespace MovieApi.Controllers
         [HttpGet("{id}")]
         public async Task<ActionResult<MovieDto>> GetMovie(int id)
         {
-            var movie = await _context.Movie.Include(m => m.Genre).FirstOrDefaultAsync(m => m.Id == id);
+            var movie = await _context.Movie.Include(m => m.Genre).Include(m => m.Director).FirstOrDefaultAsync(m => m.Id == id);
 
             if (movie == null)
             {
@@ -65,6 +69,8 @@ namespace MovieApi.Controllers
                 Year = movie.Year,
                 GenreId = movie.GenreId,
                 GenreName = movie.Genre != null ? movie.Genre.Name : string.Empty,
+                DirectorId = movie.DirectorId,
+                DirectorName = movie.Director != null ? movie.Director.Name : string.Empty,
                 Duration = movie.Duration
             };
             return dto;
@@ -99,6 +105,7 @@ namespace MovieApi.Controllers
         {
             var movieDetail = await _context.Movie
                 .Include(m => m.Genre)
+                .Include(m => m.Director)
                 .Where(m => m.Id == id)
                 .Select(m => new MovieDetailDto
                 {
@@ -107,6 +114,8 @@ namespace MovieApi.Controllers
                     Year = m.Year,
                     GenreId = m.GenreId,
                     GenreName = m.Genre != null ? m.Genre.Name : string.Empty,
+                    DirectorId = m.DirectorId,
+                    DirectorName = m.Director != null ? m.Director.Name : string.Empty,
                     Duration = m.Duration,
                     MovieDetails = m.MovieDetails == null ? null : new MovieDetailsDto
                     {
@@ -164,6 +173,7 @@ namespace MovieApi.Controllers
             movie.Title = dto.Title;
             movie.Year = dto.Year;
             movie.GenreId = dto.GenreId;
+            movie.DirectorId = dto.DirectorId;
             movie.Duration = dto.Duration;
 
             try
@@ -198,11 +208,16 @@ namespace MovieApi.Controllers
             if (genre == null)
                 return BadRequest($"Genre with id {dto.GenreId} does not exist.");
 
+            var director = await _context.Director.FindAsync(dto.DirectorId);
+            if (director == null)
+                return BadRequest($"Director with id {dto.DirectorId} does not exist.");
+
             var movie = new Movie
             {
                 Title = dto.Title,
                 Year = dto.Year,
                 GenreId = dto.GenreId,
+                DirectorId = dto.DirectorId,
                 Duration = dto.Duration
             };
 
@@ -216,6 +231,8 @@ namespace MovieApi.Controllers
                 Year = movie.Year,
                 GenreId = movie.GenreId,
                 GenreName = genre.Name,
+                DirectorId = movie.DirectorId,
+                DirectorName = director.Name,
                 Duration = movie.Duration
             };
 
