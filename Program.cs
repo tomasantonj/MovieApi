@@ -2,6 +2,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using MovieApi.Data;
 using MovieApi.Extensions;
+using Microsoft.OpenApi.Models; // Add for Swagger
 
 namespace MovieApi
 {
@@ -14,21 +15,22 @@ namespace MovieApi
                 options.UseSqlServer(builder.Configuration.GetConnectionString("MovieApiContext") ?? throw new InvalidOperationException("Connection string 'MovieApiContext' not found.")));
 
             // Add services to the container.
-
             builder.Services.AddControllers();
-            // Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
-            builder.Services.AddOpenApi();
+            builder.Services.AddSwaggerGen(); // Register Swagger
 
             var app = builder.Build();
-
- 
 
             // Configure the HTTP request pipeline.
             if (app.Environment.IsDevelopment())
             {
                 // Seed the database
                 app.Seed();
-                app.MapOpenApi();
+                app.UseSwagger(); // Enable Swagger middleware
+                app.UseSwaggerUI(options =>
+                {
+                    options.SwaggerEndpoint("/swagger/v1/swagger.json", "Movie API V1");
+                    options.RoutePrefix = string.Empty; // Set Swagger UI at the app's root
+                });
             }
 
             app.UseHttpsRedirection();
