@@ -16,3 +16,6 @@
 - Todo: Add ReportsController listing movies by review data:
 - (top5 per genre, average ratings per genre, most active actors movies with most reviews, most common genre, etc.)
  
+## Extras 3
+- Add faker data to the database to replace the current seed data?
+- Move the seeddata method and data into a service that can be called from the controller?

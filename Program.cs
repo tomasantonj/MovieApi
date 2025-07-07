@@ -25,7 +25,8 @@ namespace MovieApi
             {
                 // Seed the database
                 app.Seed();
-                app.UseSwagger(); // Enable Swagger middleware
+                // Enable Swagger middleware
+                app.UseSwagger();
                 app.UseSwaggerUI(options =>
                 {
                     options.SwaggerEndpoint("/swagger/v1/swagger.json", "Movie API V1");

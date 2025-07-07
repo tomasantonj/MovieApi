@@ -1,10 +1,11 @@
 using Microsoft.AspNetCore.Builder;
 using Microsoft.Extensions.DependencyInjection;
 using MovieApi.Data;
+using MovieApi.Services;
 
 namespace MovieApi.Extensions
 {
-    public static class SeedData
+    public static class SeedDataExtensions
     {
         public static void Seed(this IApplicationBuilder app)
         {

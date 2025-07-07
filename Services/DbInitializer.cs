@@ -1,7 +1,8 @@
 using MovieApi.Models;
 using Microsoft.EntityFrameworkCore;
+using MovieApi.Data;
 
-namespace MovieApi.Data
+namespace MovieApi.Services
 {
     public static class DbInitializer
     {
@@ -107,4 +108,3 @@ namespace MovieApi.Data
         }
     }
 }
-       
