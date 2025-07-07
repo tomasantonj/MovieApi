@@ -21,5 +21,38 @@ namespace MovieApi.Data
         public DbSet<MovieActor> MovieActor { get; set; } = default!;
         public DbSet<Genre> Genre { get; set; } = default!;
         public DbSet<Director> Director { get; set; } = default!;
+
+        protected override void OnModelCreating(ModelBuilder modelBuilder)
+        {
+            base.OnModelCreating(modelBuilder);
+
+            // Property constraints 
+            modelBuilder.Entity<Movie>()
+                .Property(m => m.Title)
+                .IsRequired()
+                .HasMaxLength(100);
+
+            modelBuilder.Entity<Genre>()
+                .Property(g => g.Name)
+                .IsRequired()
+                .HasMaxLength(50);
+
+            modelBuilder.Entity<Director>()
+                .Property(d => d.Name)
+                .IsRequired()
+                .HasMaxLength(100);
+
+            modelBuilder.Entity<Actor>()
+                .Property(a => a.Name)
+                .IsRequired()
+                .HasMaxLength(100);
+            
+            modelBuilder.Entity<MovieReview>()
+                .Property(r => r.Comment)
+                .IsRequired()
+                .HasMaxLength(500);
+
+            // TODO: If we need any specific configurations for relationships, add them here but right now the default conventions are fine
+        }
     }
 }
