@@ -5,6 +5,7 @@
 
 ## Todo
 - Add controller and DTOs for director
+- Add endpoint for api/Movies/1/actors
 
 ### extras 1
 - Todo: Add a new endpoint to get all movies by a specific director
