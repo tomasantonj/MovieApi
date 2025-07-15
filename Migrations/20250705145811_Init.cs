@@ -1,5 +1,4 @@
 ﻿using Microsoft.EntityFrameworkCore.Migrations;
-using Movie.Data;
 
 #nullable disable
 
@@ -89,7 +88,7 @@ namespace MovieApi.Migrations
                 });
 
             migrationBuilder.CreateTable(
-                name: "MovieReview",
+                name: "Review",
                 columns: table => new
                 {
                     Id = table.Column<int>(type: "int", nullable: false)
@@ -101,9 +100,9 @@ namespace MovieApi.Migrations
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_MovieReview", x => x.Id);
+                    table.PrimaryKey("PK_Review", x => x.Id);
                     table.ForeignKey(
-                        name: "FK_MovieReview_Movie_MovieId",
+                        name: "FK_Review_Movie_MovieId",
                         column: x => x.MovieId,
                         principalTable: "Movie",
                         principalColumn: "Id",
@@ -127,8 +126,8 @@ namespace MovieApi.Migrations
                 unique: true);
 
             migrationBuilder.CreateIndex(
-                name: "IX_MovieReview_MovieId",
-                table: "MovieReview",
+                name: "IX_Review_MovieId",
+                table: "Review",
                 column: "MovieId");
         }
 
@@ -142,7 +141,7 @@ namespace MovieApi.Migrations
                 name: "MovieDetails");
 
             migrationBuilder.DropTable(
-                name: "MovieReview");
+                name: "Review");
 
             migrationBuilder.DropTable(
                 name: "Actor");

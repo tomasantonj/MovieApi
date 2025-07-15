@@ -5,14 +5,15 @@ using Microsoft.EntityFrameworkCore.Metadata;
 using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Movie.Data;
+using Movie.Core.Models;
 
 #nullable disable
 
 namespace MovieApi.Migrations
 {
     [DbContext(typeof(MovieApiContext))]
-    [Migration("20250705164723_Init")]
-    partial class Init
+    [Migration("20250705155210_ChangedReviewToMovieReview")]
+    partial class ChangedReviewToMovieReview
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)

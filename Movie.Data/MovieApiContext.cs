@@ -13,40 +13,40 @@ namespace Movie.Data
         {
         }
 
-        public DbSet<Movie.Core.Domain.Models.Movie> Movies { get; set; } = default!;
-        public DbSet<Movie.Core.Domain.Models.Actor> Actors { get; set; } = default!;
-        public DbSet<Movie.Core.Domain.Models.MovieDetails> MovieDetails { get; set; } = default!;
-        public DbSet<Movie.Core.Domain.Models.MovieReview> MovieReviews { get; set; } = default!;
-        public DbSet<Movie.Core.Domain.Models.MovieActor> MovieActors { get; set; } = default!;
-        public DbSet<Movie.Core.Domain.Models.Genre> Genres { get; set; } = default!;
-        public DbSet<Movie.Core.Domain.Models.Director> Directors { get; set; } = default!;
+        public DbSet<Movie.Core.Models.Movie> Movies { get; set; } = default!;
+        public DbSet<Movie.Core.Models.Actor> Actors { get; set; } = default!;
+        public DbSet<Movie.Core.Models.MovieDetails> MovieDetails { get; set; } = default!;
+        public DbSet<Movie.Core.Models.MovieReview> MovieReviews { get; set; } = default!;
+        public DbSet<Movie.Core.Models.MovieActor> MovieActors { get; set; } = default!;
+        public DbSet<Movie.Core.Models.Genre> Genres { get; set; } = default!;
+        public DbSet<Movie.Core.Models.Director> Directors { get; set; } = default!;
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             base.OnModelCreating(modelBuilder);
 
             // Property constraints 
-            modelBuilder.Entity<Movie.Core.Domain.Models.Movie>()
+            modelBuilder.Entity<Movie.Core.Models.Movie>()
                 .Property(m => m.Title)
                 .IsRequired()
                 .HasMaxLength(100);
 
-            modelBuilder.Entity<Movie.Core.Domain.Models.Genre>()
+            modelBuilder.Entity<Movie.Core.Models.Genre>()
                 .Property(g => g.Name)
                 .IsRequired()
                 .HasMaxLength(50);
 
-            modelBuilder.Entity<Movie.Core.Domain.Models.Director>()
+            modelBuilder.Entity<Movie.Core.Models.Director>()
                 .Property(d => d.Name)
                 .IsRequired()
                 .HasMaxLength(100);
 
-            modelBuilder.Entity<Movie.Core.Domain.Models.Actor>()
+            modelBuilder.Entity<Movie.Core.Models.Actor>()
                 .Property(a => a.Name)
                 .IsRequired()
                 .HasMaxLength(100);
             
-            modelBuilder.Entity<Movie.Core.Domain.Models.MovieReview>()
+            modelBuilder.Entity<Movie.Core.Models.MovieReview>()
                 .Property(r => r.Comment)
                 .IsRequired()
                 .HasMaxLength(500);

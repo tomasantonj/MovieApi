@@ -6,7 +6,7 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Movie.Data;
-using Movie.Core.Domain.Models;
+using Movie.Core.Models;
 using Movie.Core.DTOs;
 
 namespace MovieApi.Controllers
@@ -213,7 +213,8 @@ namespace MovieApi.Controllers
                 return BadRequest($"Director with id {dto.DirectorId} does not exist.");
 
             // Using fully qualified name for Movie to avoid ambiguity with Movie namespace
-            var movie = new Movie.Core.Domain.Models.Movie
+            // TODO: does not work still
+            var movie = new Movie.Core.Models.Movie
             {
                 Title = dto.Title,
                 Year = dto.Year,

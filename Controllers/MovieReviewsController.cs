@@ -6,7 +6,7 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Movie.Data;
-using Movie.Core.Domain.Models;
+using Movie.Core.Models;
 using Movie.Core.DTOs;
 
 namespace MovieApi.Controllers

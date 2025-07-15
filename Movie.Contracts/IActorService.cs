@@ -1,4 +1,4 @@
-using Movie.Core.Domain.Models;
+using Movie.Core.Models;
 using Movie.Core.DTOs;
 using System.Collections.Generic;
 using System.Threading.Tasks;

@@ -1,5 +1,5 @@
 using Microsoft.EntityFrameworkCore;
-using Movie.Core.Domain.Models;
+using Movie.Core.Models;
 using Bogus;
 using System.Collections.Generic;
 using System.Linq;
@@ -41,7 +41,7 @@ namespace Movie.Data
             context.SaveChanges();
 
             // Movies
-            var movieFaker = new Faker<Movie.Core.Domain.Models.Movie>()
+            var movieFaker = new Faker<Movie.Core.Models.Movie>()
                 .RuleFor(m => m.Title, (f, m) => f.Lorem.Sentence(2, 3))
                 .RuleFor(m => m.Year, (f, m) => f.Date.Between(new System.DateTime(1980, 1, 1), new System.DateTime(2024, 1, 1)).Year)
                 .RuleFor(m => m.Duration, (f, m) => f.Random.Int(80, 180))
