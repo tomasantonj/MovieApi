@@ -1,12 +1,12 @@
 ﻿namespace MovieApi.Movie.Core.DomainContracts
 {
-    public interface IMovieRepository
+    public interface IVideoMovieRepository
     {
-        //Task<IEnumerable<Movie>> GetAllAsync();
-        //Task<Movie> GetAsync(int id);
+        //Task<IEnumerable<VideoMovie>> GetAllAsync();
+        //Task<VideoMovie> GetAsync(int id);
         //Task<bool> AnyAsync(int id);
-        //void Add(Movie movie);
-        //void Update(Movie movie);
-        //void Remove(Movie movie);
+        //void Add(VideoMovie movie);
+        //void Update(VideoMovie movie);
+        //void Remove(VideoMovie movie);
     }
 }

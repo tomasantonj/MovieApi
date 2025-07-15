@@ -1,6 +1,6 @@
 namespace Movie.Core.Models
 {
-    public class Movie
+    public class VideoMovie
     {
         public int Id { get; set; }
         public string Title { get; set; }
@@ -22,14 +22,14 @@ namespace Movie.Core.Models
     {
         public int Id { get; set; }
         public string Name { get; set; }
-        public ICollection<Movie> Movies { get; set; } = new List<Movie>();
+        public ICollection<VideoMovie> Movies { get; set; } = new List<VideoMovie>();
     }
 
     public class MovieActor
     {
         public int Id { get; set; }
-        public int MovieId { get; set; }
-        public Movie Movie { get; set; }
+        public int VideoMovieId { get; set; }
+        public VideoMovie VideoMovie { get; set; }
         public int ActorId { get; set; }
         public Actor Actor { get; set; }
     }

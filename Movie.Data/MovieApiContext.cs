@@ -13,7 +13,7 @@ namespace Movie.Data
         {
         }
 
-        public DbSet<Movie.Core.Models.Movie> Movies { get; set; } = default!;
+        public DbSet<Movie.Core.Models.VideoMovie> VideoMovies { get; set; } = default!;
         public DbSet<Movie.Core.Models.Actor> Actors { get; set; } = default!;
         public DbSet<Movie.Core.Models.MovieDetails> MovieDetails { get; set; } = default!;
         public DbSet<Movie.Core.Models.MovieReview> MovieReviews { get; set; } = default!;
@@ -26,7 +26,7 @@ namespace Movie.Data
             base.OnModelCreating(modelBuilder);
 
             // Property constraints 
-            modelBuilder.Entity<Movie.Core.Models.Movie>()
+            modelBuilder.Entity<Movie.Core.Models.VideoMovie>()
                 .Property(m => m.Title)
                 .IsRequired()
                 .HasMaxLength(100);

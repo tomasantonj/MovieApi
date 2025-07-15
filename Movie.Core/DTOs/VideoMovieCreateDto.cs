@@ -2,7 +2,7 @@ using System.ComponentModel.DataAnnotations;
 
 namespace Movie.Core.DTOs
 {
-    public class MovieCreateDto
+    public class VideoMovieCreateDto
     {
         [Required]
         [StringLength(100, MinimumLength = 1)]

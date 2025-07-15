@@ -28,17 +28,17 @@ namespace MovieApi.Controllers
         public async Task<ActionResult<IEnumerable<ReviewDto>>> GetMovieReview()
         {
             var reviews = await _context.MovieReviews
-                .Include(r => r.Movie)
+                .Include(r => r.VideoMovie)
                 .ThenInclude(m => m.Genre)
                 .Select(r => new ReviewDto
                 {
                     ReviewerName = r.ReviewerName,
                     Rating = r.Rating,
                     Comment = r.Comment,
-                    MovieTitle = r.Movie != null ? r.Movie.Title : null,
-                    MovieYear = r.Movie != null ? r.Movie.Year : null,
-                    MovieGenre = r.Movie != null && r.Movie.Genre != null ? r.Movie.Genre.Name : null,
-                    MovieDuration = r.Movie != null ? r.Movie.Duration : null
+                    MovieTitle = r.VideoMovie != null ? r.VideoMovie.Title : null,
+                    MovieYear = r.VideoMovie != null ? r.VideoMovie.Year : null,
+                    MovieGenre = r.VideoMovie != null && r.VideoMovie.Genre != null ? r.VideoMovie.Genre.Name : null,
+                    MovieDuration = r.VideoMovie != null ? r.VideoMovie.Duration : null
                 })
                 .ToListAsync();
             return reviews;
@@ -50,7 +50,7 @@ namespace MovieApi.Controllers
         public async Task<ActionResult<ReviewDto>> GetMovieReview(int id)
         {
             var r = await _context.MovieReviews
-                .Include(r => r.Movie)
+                .Include(r => r.VideoMovie)
                 .ThenInclude(m => m.Genre)
                 .FirstOrDefaultAsync(r => r.Id == id);
 
@@ -63,10 +63,10 @@ namespace MovieApi.Controllers
                 ReviewerName = r.ReviewerName,
                 Rating = r.Rating,
                 Comment = r.Comment,
-                MovieTitle = r.Movie != null ? r.Movie.Title : null,
-                MovieYear = r.Movie != null ? r.Movie.Year : null,
-                MovieGenre = r.Movie != null && r.Movie.Genre != null ? r.Movie.Genre.Name : null,
-                MovieDuration = r.Movie != null ? r.Movie.Duration : null
+                MovieTitle = r.VideoMovie != null ? r.VideoMovie.Title : null,
+                MovieYear = r.VideoMovie != null ? r.VideoMovie.Year : null,
+                MovieGenre = r.VideoMovie != null && r.VideoMovie.Genre != null ? r.VideoMovie.Genre.Name : null,
+                MovieDuration = r.VideoMovie != null ? r.VideoMovie.Duration : null
             };
             return dto;
         }
@@ -88,7 +88,7 @@ namespace MovieApi.Controllers
             }
 
             // Optionally validate that the referenced Movie exists
-            var movieExists = await _context.Movies.AnyAsync(m => m.Id == updateDto.MovieId);
+            var movieExists = await _context.VideoMovies.AnyAsync(m => m.Id == updateDto.MovieId);
             if (!movieExists)
             {
                 return BadRequest($"Movie with Id {updateDto.MovieId} does not exist.");
@@ -98,7 +98,7 @@ namespace MovieApi.Controllers
             movieReview.ReviewerName = updateDto.ReviewerName;
             movieReview.Rating = updateDto.Rating;
             movieReview.Comment = updateDto.Comment;
-            movieReview.MovieId = updateDto.MovieId;
+            movieReview.VideoMovieId = updateDto.MovieId;
 
             try
             {

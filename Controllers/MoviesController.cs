@@ -26,9 +26,9 @@ namespace MovieApi.Controllers
         // Supports optional filtering by genreId, year, and directorId using FromQuery
         // GenreId, year, and directorId are all optional so you can use them separately or together
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<MovieDto>>> GetMovie([FromQuery] int? genreId, [FromQuery] int? year, [FromQuery] int? directorId)
+        public async Task<ActionResult<IEnumerable<VideoMovieDto>>> GetMovie([FromQuery] int? genreId, [FromQuery] int? year, [FromQuery] int? directorId)
         {
-            var query = _context.Movies.Include(m => m.Genre).Include(m => m.Director).AsQueryable();
+            var query = _context.VideoMovies.Include(m => m.Genre).Include(m => m.Director).AsQueryable();
 
             if (genreId.HasValue)
                 query = query.Where(m => m.GenreId == genreId.Value);
@@ -37,7 +37,7 @@ namespace MovieApi.Controllers
             if (directorId.HasValue)
                 query = query.Where(m => m.DirectorId == directorId.Value);
 
-            var movies = await query.Select(m => new MovieDto
+            var movies = await query.Select(m => new VideoMovieDto
             {
                 Id = m.Id,
                 Title = m.Title,
@@ -53,16 +53,16 @@ namespace MovieApi.Controllers
 
         // GET: api/Movies/5
         [HttpGet("{id}")]
-        public async Task<ActionResult<MovieDto>> GetMovie(int id)
+        public async Task<ActionResult<VideoMovieDto>> GetMovie(int id)
         {
-            var movie = await _context.Movies.Include(m => m.Genre).Include(m => m.Director).FirstOrDefaultAsync(m => m.Id == id);
+            var movie = await _context.VideoMovies.Include(m => m.Genre).Include(m => m.Director).FirstOrDefaultAsync(m => m.Id == id);
 
             if (movie == null)
             {
                 return NotFound();
             }
 
-            var dto = new MovieDto
+            var dto = new VideoMovieDto
             {
                 Id = movie.Id,
                 Title = movie.Title,
@@ -82,17 +82,17 @@ namespace MovieApi.Controllers
         public async Task<ActionResult<IEnumerable<ReviewDto>>> GetReviewsForMovie(int movieId)
         {
             var reviews = await _context.MovieReviews
-                .Where(r => r.MovieId == movieId)
-                .Include(r => r.Movie)
+                .Where(r => r.VideoMovieId == movieId)
+                .Include(r => r.VideoMovie)
                 .Select(r => new ReviewDto
                 {
                     ReviewerName = r.ReviewerName,
                     Rating = r.Rating,
                     Comment = r.Comment,
-                    MovieTitle = r.Movie != null ? r.Movie.Title : null,
-                    MovieYear = r.Movie != null ? r.Movie.Year : null,
-                    MovieGenre = r.Movie != null ? r.Movie.Genre.Name : null,
-                    MovieDuration = r.Movie != null ? r.Movie.Duration : null
+                    MovieTitle = r.VideoMovie != null ? r.VideoMovie.Title : null,
+                    MovieYear = r.VideoMovie != null ? r.VideoMovie.Year : null,
+                    MovieGenre = r.VideoMovie != null ? r.VideoMovie.Genre.Name : null,
+                    MovieDuration = r.VideoMovie != null ? r.VideoMovie.Duration : null
                 })
                 .ToListAsync();
             return reviews;
@@ -103,7 +103,7 @@ namespace MovieApi.Controllers
         [HttpGet("{id}/details")]
         public async Task<ActionResult<MovieDetailDto>> GetMovieDetails(int id)
         {
-            var movieDetail = await _context.Movies
+            var movieDetail = await _context.VideoMovies
                 .Include(m => m.Genre)
                 .Include(m => m.Director)
                 .Where(m => m.Id == id)
@@ -152,7 +152,7 @@ namespace MovieApi.Controllers
         // PUT: api/Movies/5
         // Updates Movie through the MovieUpdateDTO and returns 204 No Content if successful.
         [HttpPut("{id}")]
-        public async Task<IActionResult> PutMovie(int id, [FromBody] MovieUpdateDto dto)
+        public async Task<IActionResult> PutMovie(int id, [FromBody] VideoMovieUpdateDto dto)
         {
             if (id != dto.Id)
             {
@@ -164,7 +164,7 @@ namespace MovieApi.Controllers
                 return BadRequest(ModelState);
             }
 
-            var movie = await _context.Movies.FindAsync(id);
+            var movie = await _context.VideoMovies.FindAsync(id);
             if (movie == null)
             {
                 return NotFound();
@@ -199,7 +199,7 @@ namespace MovieApi.Controllers
         // This allows to send a json with movie details to create a new movie
         // and store it in the database. It then returns the created movie with a 201 status code.
         [HttpPost]
-        public async Task<ActionResult<MovieDto>> PostMovie([FromBody] MovieCreateDto dto)
+        public async Task<ActionResult<VideoMovieDto>> PostMovie([FromBody] VideoMovieCreateDto dto)
         {
             if (!ModelState.IsValid)
                 return BadRequest(ModelState);
@@ -212,9 +212,7 @@ namespace MovieApi.Controllers
             if (director == null)
                 return BadRequest($"Director with id {dto.DirectorId} does not exist.");
 
-            // Using fully qualified name for Movie to avoid ambiguity with Movie namespace
-            // TODO: does not work still
-            var movie = new Movie.Core.Models.Movie
+            var movie = new VideoMovie
             {
                 Title = dto.Title,
                 Year = dto.Year,
@@ -223,10 +221,10 @@ namespace MovieApi.Controllers
                 Duration = dto.Duration
             };
 
-            _context.Movies.Add(movie);
+            _context.VideoMovies.Add(movie);
             await _context.SaveChangesAsync();
 
-            var result = new MovieDto
+            var result = new VideoMovieDto
             {
                 Id = movie.Id,
                 Title = movie.Title,
@@ -246,7 +244,7 @@ namespace MovieApi.Controllers
         [HttpPost("{movieId}/actors/{actorId}")]
         public async Task<IActionResult> AddActorToMovie(int movieId, int actorId)
         {
-            var movie = await _context.Movies.FindAsync(movieId);
+            var movie = await _context.VideoMovies.FindAsync(movieId);
             if (movie == null)
                 return NotFound($"Movie with id {movieId} not found.");
 
@@ -254,11 +252,11 @@ namespace MovieApi.Controllers
             if (actor == null)
                 return NotFound($"Actor with id {actorId} not found.");
 
-            bool alreadyExists = await _context.MovieActors.AnyAsync(ma => ma.MovieId == movieId && ma.ActorId == actorId);
+            bool alreadyExists = await _context.MovieActors.AnyAsync(ma => ma.VideoMovieId == movieId && ma.ActorId == actorId);
             if (alreadyExists)
                 return Conflict($"Actor with id {actorId} is already associated with movie {movieId}.");
 
-            var movieActor = new MovieActor { MovieId = movieId, ActorId = actorId };
+            var movieActor = new MovieActor { VideoMovieId = movieId, ActorId = actorId };
             _context.MovieActors.Add(movieActor);
             await _context.SaveChangesAsync();
 
@@ -270,13 +268,13 @@ namespace MovieApi.Controllers
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteMovie(int id)
         {
-            var movie = await _context.Movies.FindAsync(id);
+            var movie = await _context.VideoMovies.FindAsync(id);
             if (movie == null)
             {
                 return NotFound();
             }
 
-            _context.Movies.Remove(movie);
+            _context.VideoMovies.Remove(movie);
             await _context.SaveChangesAsync();
 
             return NoContent();
@@ -284,7 +282,7 @@ namespace MovieApi.Controllers
 
         private bool MovieExists(int id)
         {
-            return _context.Movies.Any(e => e.Id == id);
+            return _context.VideoMovies.Any(e => e.Id == id);
         }
     }
 }

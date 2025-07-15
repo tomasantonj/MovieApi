@@ -12,7 +12,7 @@ namespace Movie.Data
         {
             context.Database.Migrate();
 
-            if (context.Movies.Any())
+            if (context.VideoMovies.Any())
                 return; // DB has been seeded
 
             // Movie genres (no available movie genres in bogus)
@@ -40,15 +40,15 @@ namespace Movie.Data
             context.Actors.AddRange(actors);
             context.SaveChanges();
 
-            // Movies
-            var movieFaker = new Faker<Movie.Core.Models.Movie>()
+            // VideoMovies
+            var movieFaker = new Faker<VideoMovie>()
                 .RuleFor(m => m.Title, (f, m) => f.Lorem.Sentence(2, 3))
                 .RuleFor(m => m.Year, (f, m) => f.Date.Between(new System.DateTime(1980, 1, 1), new System.DateTime(2024, 1, 1)).Year)
                 .RuleFor(m => m.Duration, (f, m) => f.Random.Int(80, 180))
                 .RuleFor(m => m.GenreId, (f, m) => f.PickRandom(genres).Id)
                 .RuleFor(m => m.DirectorId, (f, m) => f.PickRandom(directors).Id);
             var movies = movieFaker.Generate(40);
-            context.Movies.AddRange(movies);
+            context.VideoMovies.AddRange(movies);
             context.SaveChanges();
 
             // MovieDetails
@@ -58,7 +58,7 @@ namespace Movie.Data
                 .RuleFor(md => md.Budget, (f, md) => f.Random.Int(1000000, 200000000));
             var movieDetails = movies.Select(m => {
                 var details = movieDetailsFaker.Generate();
-                details.MovieId = m.Id;
+                details.VideoMovieId = m.Id;
                 return details;
             }).ToList();
             context.MovieDetails.AddRange(movieDetails);
@@ -73,7 +73,7 @@ namespace Movie.Data
                 var selectedActors = actors.OrderBy(a => rand.Next()).Take(actorCount).ToList();
                 foreach (var actor in selectedActors)
                 {
-                    movieActors.Add(new MovieActor { MovieId = movie.Id, ActorId = actor.Id });
+                    movieActors.Add(new MovieActor { VideoMovieId = movie.Id, ActorId = actor.Id });
                 }
             }
             context.MovieActors.AddRange(movieActors);
@@ -91,7 +91,7 @@ namespace Movie.Data
                 for (int i = 0; i < reviewCount; i++)
                 {
                     var review = reviewFaker.Generate();
-                    review.MovieId = movie.Id;
+                    review.VideoMovieId = movie.Id;
                     reviews.Add(review);
                 }
             }

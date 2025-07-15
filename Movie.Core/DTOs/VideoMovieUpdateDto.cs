@@ -2,7 +2,7 @@ using System.ComponentModel.DataAnnotations;
 
 namespace Movie.Core.DTOs
 {
-    public class MovieUpdateDto
+    public class VideoMovieUpdateDto
     {
         [Required]
         public int Id { get; set; }

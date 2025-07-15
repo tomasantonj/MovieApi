@@ -1,6 +1,6 @@
 namespace Movie.Core.DTOs
 {
-    public class MovieDto
+    public class VideoMovieDto
     {
         public int Id { get; set; }
         public string Title { get; set; } = string.Empty;
