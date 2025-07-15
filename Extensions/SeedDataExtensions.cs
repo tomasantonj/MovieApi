@@ -1,7 +1,6 @@
 using Microsoft.AspNetCore.Builder;
 using Microsoft.Extensions.DependencyInjection;
-using MovieApi.Data;
-using MovieApi.Services;
+using Movie.Data;
 
 namespace MovieApi.Extensions
 {

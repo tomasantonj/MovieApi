@@ -1,6 +1,6 @@
 using System.Collections.Generic;
 
-namespace MovieApi.DTOs
+namespace Movie.Core.DTOs
 {
     public class MovieDetailDto
     {

@@ -1,8 +1,8 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
-using MovieApi.Data;
-using MovieApi.Extensions;
+using Movie.Data;
 using Microsoft.OpenApi.Models; // Add for Swagger
+using MovieApi.Extensions;
 
 namespace MovieApi
 {

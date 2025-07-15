@@ -1,6 +1,4 @@
-using System.Collections.Generic;
-
-namespace MovieApi.Models
+namespace Movie.Core.Domain.Models
 {
     public class Movie
     {
@@ -29,7 +27,7 @@ namespace MovieApi.Models
 
     public class MovieActor
     {
-        public int Id { get; set; } 
+        public int Id { get; set; }
         public int MovieId { get; set; }
         public Movie Movie { get; set; }
         public int ActorId { get; set; }

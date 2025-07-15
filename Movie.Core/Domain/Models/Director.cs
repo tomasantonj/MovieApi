@@ -1,6 +1,4 @@
-using System.Collections.Generic;
-
-namespace MovieApi.Models
+namespace Movie.Core.Domain.Models
 {
     public class Director
     {

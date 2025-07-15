@@ -1,4 +1,4 @@
-namespace MovieApi.Models
+namespace Movie.Core.Domain.Models
 {
     public class MovieReview
     {
