@@ -1,8 +1,12 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
-using Movie.Data;
 using Microsoft.OpenApi.Models; // Add for Swagger
+using Movie.Contracts;
+using Movie.Data;
+using Movie.Services;
 using MovieApi.Extensions;
+using MovieApi.Movie.Core.DomainContracts;
+using MovieApi.Movie.Data.Repositories;
 
 namespace MovieApi
 {
@@ -13,6 +17,16 @@ namespace MovieApi
             var builder = WebApplication.CreateBuilder(args);
             builder.Services.AddDbContext<MovieApiContext>(options =>
                 options.UseSqlServer(builder.Configuration.GetConnectionString("MovieApiContext") ?? throw new InvalidOperationException("Connection string 'MovieApiContext' not found.")));
+
+            // Register repositories
+            builder.Services.AddScoped<IVideoMovieRepository, VideoMovieRepository>();
+            builder.Services.AddScoped<IReviewRepository, ReviewRepository>();
+            builder.Services.AddScoped<IActorRepository, ActorRepository>();
+            // Register UnitOfWork
+            builder.Services.AddScoped<IUnitOfWork, UnitOfWork>();
+            // Register ActorService
+            builder.Services.AddScoped<IActorService, ActorService>();
+
 
             // Add services to the container.
             builder.Services.AddControllers();

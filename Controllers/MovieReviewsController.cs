@@ -4,10 +4,9 @@ using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
-using Movie.Data;
 using Movie.Core.Models;
 using Movie.Core.DTOs;
+using MovieApi.Movie.Data.Repositories;
 
 namespace MovieApi.Controllers
 {
@@ -15,11 +14,11 @@ namespace MovieApi.Controllers
     [ApiController]
     public class MovieReviewsController : ControllerBase
     {
-        private readonly MovieApiContext _context;
+        private readonly IUnitOfWork _unitOfWork;
 
-        public MovieReviewsController(MovieApiContext context)
+        public MovieReviewsController(IUnitOfWork unitOfWork)
         {
-            _context = context;
+            _unitOfWork = unitOfWork;
         }
 
         // GET: api/MovieReviews
@@ -27,21 +26,18 @@ namespace MovieApi.Controllers
         [HttpGet]
         public async Task<ActionResult<IEnumerable<ReviewDto>>> GetMovieReview()
         {
-            var reviews = await _context.MovieReviews
-                .Include(r => r.VideoMovie)
-                .ThenInclude(m => m.Genre)
-                .Select(r => new ReviewDto
-                {
-                    ReviewerName = r.ReviewerName,
-                    Rating = r.Rating,
-                    Comment = r.Comment,
-                    MovieTitle = r.VideoMovie != null ? r.VideoMovie.Title : null,
-                    MovieYear = r.VideoMovie != null ? r.VideoMovie.Year : null,
-                    MovieGenre = r.VideoMovie != null && r.VideoMovie.Genre != null ? r.VideoMovie.Genre.Name : null,
-                    MovieDuration = r.VideoMovie != null ? r.VideoMovie.Duration : null
-                })
-                .ToListAsync();
-            return reviews;
+            var reviews = await _unitOfWork.Reviews.GetAllAsync();
+            var result = reviews.Select(r => new ReviewDto
+            {
+                ReviewerName = r.ReviewerName,
+                Rating = r.Rating,
+                Comment = r.Comment,
+                MovieTitle = r.VideoMovie != null ? r.VideoMovie.Title : null,
+                MovieYear = r.VideoMovie != null ? r.VideoMovie.Year : null,
+                MovieGenre = r.VideoMovie != null && r.VideoMovie.Genre != null ? r.VideoMovie.Genre.Name : null,
+                MovieDuration = r.VideoMovie != null ? r.VideoMovie.Duration : null
+            }).ToList();
+            return result;
         }
 
         // GET: api/MovieReviews/5
@@ -49,15 +45,9 @@ namespace MovieApi.Controllers
         [HttpGet("{id}")]
         public async Task<ActionResult<ReviewDto>> GetMovieReview(int id)
         {
-            var r = await _context.MovieReviews
-                .Include(r => r.VideoMovie)
-                .ThenInclude(m => m.Genre)
-                .FirstOrDefaultAsync(r => r.Id == id);
-
+            var r = await _unitOfWork.Reviews.GetAsync(id);
             if (r == null)
-            {
                 return NotFound();
-            }
             var dto = new ReviewDto
             {
                 ReviewerName = r.ReviewerName,
@@ -77,45 +67,21 @@ namespace MovieApi.Controllers
         public async Task<IActionResult> PutMovieReview(int id, ReviewUpdateDto updateDto)
         {
             if (id != updateDto.Id)
-            {
                 return BadRequest();
-            }
-
-            var movieReview = await _context.MovieReviews.FindAsync(id);
+            var movieReview = await _unitOfWork.Reviews.GetAsync(id);
             if (movieReview == null)
-            {
                 return NotFound();
-            }
-
             // Optionally validate that the referenced Movie exists
-            var movieExists = await _context.VideoMovies.AnyAsync(m => m.Id == updateDto.MovieId);
+            var movieExists = await _unitOfWork.VideoMovies.AnyAsync(updateDto.MovieId);
             if (!movieExists)
-            {
                 return BadRequest($"Movie with Id {updateDto.MovieId} does not exist.");
-            }
-
             // Update allowed fields
             movieReview.ReviewerName = updateDto.ReviewerName;
             movieReview.Rating = updateDto.Rating;
             movieReview.Comment = updateDto.Comment;
             movieReview.VideoMovieId = updateDto.MovieId;
-
-            try
-            {
-                await _context.SaveChangesAsync();
-            }
-            catch (DbUpdateConcurrencyException)
-            {
-                if (!MovieReviewExists(id))
-                {
-                    return NotFound();
-                }
-                else
-                {
-                    throw;
-                }
-            }
-
+            _unitOfWork.Reviews.Update(movieReview);
+            await _unitOfWork.CompleteAsync();
             return NoContent();
         }
 
@@ -123,9 +89,8 @@ namespace MovieApi.Controllers
         [HttpPost]
         public async Task<ActionResult<MovieReview>> PostMovieReview(MovieReview movieReview)
         {
-            _context.MovieReviews.Add(movieReview);
-            await _context.SaveChangesAsync();
-
+            _unitOfWork.Reviews.Add(movieReview);
+            await _unitOfWork.CompleteAsync();
             return CreatedAtAction("GetMovieReview", new { id = movieReview.Id }, movieReview);
         }
 
@@ -133,21 +98,12 @@ namespace MovieApi.Controllers
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteMovieReview(int id)
         {
-            var movieReview = await _context.MovieReviews.FindAsync(id);
+            var movieReview = await _unitOfWork.Reviews.GetAsync(id);
             if (movieReview == null)
-            {
                 return NotFound();
-            }
-
-            _context.MovieReviews.Remove(movieReview);
-            await _context.SaveChangesAsync();
-
+            _unitOfWork.Reviews.Remove(movieReview);
+            await _unitOfWork.CompleteAsync();
             return NoContent();
-        }
-
-        private bool MovieReviewExists(int id)
-        {
-            return _context.MovieReviews.Any(e => e.Id == id);
         }
     }
 }
