@@ -1,3 +1,4 @@
+using Microsoft.AspNetCore.Mvc.Infrastructure;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.OpenApi.Models; // Add for Swagger
@@ -39,7 +40,7 @@ namespace MovieApi
             var app = builder.Build();
 
             // Add error handling middleware
-            app.UseMiddleware<ErrorHandlingMiddleware>();
+            app.UseMiddleware<ErrorHandlingMiddleware>(app.Services.GetRequiredService<ProblemDetailsFactory>());
 
             // Configure the HTTP request pipeline.
             if (app.Environment.IsDevelopment())
