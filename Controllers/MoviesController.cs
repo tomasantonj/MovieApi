@@ -26,7 +26,7 @@ namespace MovieApi.Controllers
         // Supports optional filtering by genreId, year, and directorId using FromQuery
         // GenreId, year, and directorId are all optional so you can use them separately or together
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<VideoMovieDto>>> GetMovie(
+        public async Task<ActionResult<PagedResponse<VideoMovieDto>>> GetMovie(
             [FromQuery] int? genreId,
             [FromQuery] int? year,
             [FromQuery] int? directorId,
@@ -44,6 +44,8 @@ namespace MovieApi.Controllers
                 filtered = filtered.Where(m => m.Year == year.Value);
             if (directorId.HasValue)
                 filtered = filtered.Where(m => m.DirectorId == directorId.Value);
+            var totalItems = filtered.Count();
+            var totalPages = (int)Math.Ceiling(totalItems / (double)pageSize);
             var paged = filtered
                 .Skip((page - 1) * pageSize)
                 .Take(pageSize)
@@ -59,7 +61,14 @@ namespace MovieApi.Controllers
                     Duration = m.Duration
                 })
                 .ToList();
-            return paged;
+            var meta = new PagedMeta
+            {
+                TotalItems = totalItems,
+                CurrentPage = page,
+                TotalPages = totalPages,
+                PageSize = pageSize
+            };
+            return new PagedResponse<VideoMovieDto> { Data = paged, Meta = meta };
         }
 
         // GET: api/Movies/5
@@ -86,13 +95,16 @@ namespace MovieApi.Controllers
         // GET: api/Movies/{movieId}/reviews
         // Returns a list of reviews for a specific movie
         [HttpGet("{movieId}/reviews")]
-        public async Task<ActionResult<IEnumerable<ReviewDto>>> GetReviewsForMovie(int movieId, [FromQuery] int page = 1, [FromQuery] int pageSize = 10)
+        public async Task<ActionResult<PagedResponse<ReviewDto>>> GetReviewsForMovie(int movieId, [FromQuery] int page = 1, [FromQuery] int pageSize = 10)
         {
             pageSize = Math.Min(pageSize, 100);
             page = Math.Max(page, 1);
 
             var reviews = await _unitOfWork.Reviews.GetAllAsync();
-            var filtered = reviews.Where(r => r.VideoMovieId == movieId)
+            var filtered = reviews.Where(r => r.VideoMovieId == movieId);
+            var totalItems = filtered.Count();
+            var totalPages = (int)Math.Ceiling(totalItems / (double)pageSize);
+            var paged = filtered
                 .Skip((page - 1) * pageSize)
                 .Take(pageSize)
                 .Select(r => new ReviewDto
@@ -106,7 +118,14 @@ namespace MovieApi.Controllers
                     MovieDuration = r.VideoMovie != null ? r.VideoMovie.Duration : null
                 })
                 .ToList();
-            return filtered;
+            var meta = new PagedMeta
+            {
+                TotalItems = totalItems,
+                CurrentPage = page,
+                TotalPages = totalPages,
+                PageSize = pageSize
+            };
+            return new PagedResponse<ReviewDto> { Data = paged, Meta = meta };
         }
 
         // GET: api/Movies/{id}/details
