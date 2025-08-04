@@ -26,7 +26,8 @@ namespace MovieApi
             builder.Services.AddScoped<IUnitOfWork, UnitOfWork>();
             // Register ActorService
             builder.Services.AddScoped<IActorService, ActorService>();
-
+            // Register BusinessRulesService
+            builder.Services.AddScoped<IBusinessRulesService, BusinessRulesService>();
 
             // Add services to the container.
             builder.Services.AddControllers();
