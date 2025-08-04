@@ -7,6 +7,7 @@ using Movie.Services;
 using MovieApi.Extensions;
 using MovieApi.Movie.Core.DomainContracts;
 using MovieApi.Movie.Data.Repositories;
+using MovieApi.Middleware;
 
 namespace MovieApi
 {
@@ -36,6 +37,9 @@ namespace MovieApi
             builder.Services.AddSwaggerGen(); // Register Swagger
 
             var app = builder.Build();
+
+            // Add error handling middleware
+            app.UseMiddleware<ErrorHandlingMiddleware>();
 
             // Configure the HTTP request pipeline.
             if (app.Environment.IsDevelopment())
