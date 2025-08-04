@@ -250,5 +250,48 @@ namespace MovieApi.Controllers
             await _unitOfWork.CompleteAsync();
             return NoContent();
         }
+
+        // PATCH: api/Movies/5
+        // Patch a movie's fields. Accepts partial updates for movie and movie details.
+        [HttpPatch("{id}")]
+        public async Task<IActionResult> PatchMovie(int id, [FromBody] VideoMoviePatchDto patchDto)
+        {
+            if (patchDto == null)
+                return BadRequest();
+            var movie = await _unitOfWork.VideoMovies.GetAsync(id);
+            if (movie == null)
+                return NotFound();
+
+            // Update Movie fields
+            if (patchDto.Title != null)
+                movie.Title = patchDto.Title;
+            if (patchDto.Year.HasValue)
+                movie.Year = patchDto.Year.Value;
+            if (patchDto.GenreId.HasValue)
+                movie.GenreId = patchDto.GenreId.Value;
+            if (patchDto.DirectorId.HasValue)
+                movie.DirectorId = patchDto.DirectorId.Value;
+            if (patchDto.Duration.HasValue)
+                movie.Duration = patchDto.Duration.Value;
+
+            // Update MovieDetails fields
+            if (movie.MovieDetails == null && (patchDto.Synopsis != null || patchDto.Language != null || patchDto.Budget.HasValue))
+            {
+                movie.MovieDetails = new MovieDetails();
+            }
+            if (movie.MovieDetails != null)
+            {
+                if (patchDto.Synopsis != null)
+                    movie.MovieDetails.Synopsis = patchDto.Synopsis;
+                if (patchDto.Language != null)
+                    movie.MovieDetails.Language = patchDto.Language;
+                if (patchDto.Budget.HasValue)
+                    movie.MovieDetails.Budget = patchDto.Budget.Value;
+            }
+
+            _unitOfWork.VideoMovies.Update(movie);
+            await _unitOfWork.CompleteAsync();
+            return NoContent();
+        }
     }
 }
