@@ -24,20 +24,27 @@ namespace MovieApi.Controllers
         // GET: api/MovieReviews
         // Returns a list of all movie reviews with related movie details
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<ReviewDto>>> GetMovieReview()
+        public async Task<ActionResult<IEnumerable<ReviewDto>>> GetMovieReview([FromQuery] int page = 1, [FromQuery] int pageSize = 10)
         {
+            pageSize = Math.Min(pageSize, 100);
+            page = Math.Max(page, 1);
+
             var reviews = await _unitOfWork.Reviews.GetAllAsync();
-            var result = reviews.Select(r => new ReviewDto
-            {
-                ReviewerName = r.ReviewerName,
-                Rating = r.Rating,
-                Comment = r.Comment,
-                MovieTitle = r.VideoMovie != null ? r.VideoMovie.Title : null,
-                MovieYear = r.VideoMovie != null ? r.VideoMovie.Year : null,
-                MovieGenre = r.VideoMovie != null && r.VideoMovie.Genre != null ? r.VideoMovie.Genre.Name : null,
-                MovieDuration = r.VideoMovie != null ? r.VideoMovie.Duration : null
-            }).ToList();
-            return result;
+            var paged = reviews
+                .Skip((page - 1) * pageSize)
+                .Take(pageSize)
+                .Select(r => new ReviewDto
+                {
+                    ReviewerName = r.ReviewerName,
+                    Rating = r.Rating,
+                    Comment = r.Comment,
+                    MovieTitle = r.VideoMovie != null ? r.VideoMovie.Title : null,
+                    MovieYear = r.VideoMovie != null ? r.VideoMovie.Year : null,
+                    MovieGenre = r.VideoMovie != null && r.VideoMovie.Genre != null ? r.VideoMovie.Genre.Name : null,
+                    MovieDuration = r.VideoMovie != null ? r.VideoMovie.Duration : null
+                })
+                .ToList();
+            return paged;
         }
 
         // GET: api/MovieReviews/5

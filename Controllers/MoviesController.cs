@@ -26,8 +26,16 @@ namespace MovieApi.Controllers
         // Supports optional filtering by genreId, year, and directorId using FromQuery
         // GenreId, year, and directorId are all optional so you can use them separately or together
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<VideoMovieDto>>> GetMovie([FromQuery] int? genreId, [FromQuery] int? year, [FromQuery] int? directorId)
+        public async Task<ActionResult<IEnumerable<VideoMovieDto>>> GetMovie(
+            [FromQuery] int? genreId,
+            [FromQuery] int? year,
+            [FromQuery] int? directorId,
+            [FromQuery] int page = 1,
+            [FromQuery] int pageSize = 10)
         {
+            pageSize = Math.Min(pageSize, 100);
+            page = Math.Max(page, 1);
+
             var movies = await _unitOfWork.VideoMovies.GetAllAsync();
             var filtered = movies.AsQueryable();
             if (genreId.HasValue)
@@ -36,18 +44,22 @@ namespace MovieApi.Controllers
                 filtered = filtered.Where(m => m.Year == year.Value);
             if (directorId.HasValue)
                 filtered = filtered.Where(m => m.DirectorId == directorId.Value);
-            var result = filtered.Select(m => new VideoMovieDto
-            {
-                Id = m.Id,
-                Title = m.Title,
-                Year = m.Year,
-                GenreId = m.GenreId,
-                GenreName = m.Genre != null ? m.Genre.Name : string.Empty,
-                DirectorId = m.DirectorId,
-                DirectorName = m.Director != null ? m.Director.Name : string.Empty,
-                Duration = m.Duration
-            }).ToList();
-            return result;
+            var paged = filtered
+                .Skip((page - 1) * pageSize)
+                .Take(pageSize)
+                .Select(m => new VideoMovieDto
+                {
+                    Id = m.Id,
+                    Title = m.Title,
+                    Year = m.Year,
+                    GenreId = m.GenreId,
+                    GenreName = m.Genre != null ? m.Genre.Name : string.Empty,
+                    DirectorId = m.DirectorId,
+                    DirectorName = m.Director != null ? m.Director.Name : string.Empty,
+                    Duration = m.Duration
+                })
+                .ToList();
+            return paged;
         }
 
         // GET: api/Movies/5
@@ -74,19 +86,26 @@ namespace MovieApi.Controllers
         // GET: api/Movies/{movieId}/reviews
         // Returns a list of reviews for a specific movie
         [HttpGet("{movieId}/reviews")]
-        public async Task<ActionResult<IEnumerable<ReviewDto>>> GetReviewsForMovie(int movieId)
+        public async Task<ActionResult<IEnumerable<ReviewDto>>> GetReviewsForMovie(int movieId, [FromQuery] int page = 1, [FromQuery] int pageSize = 10)
         {
+            pageSize = Math.Min(pageSize, 100);
+            page = Math.Max(page, 1);
+
             var reviews = await _unitOfWork.Reviews.GetAllAsync();
-            var filtered = reviews.Where(r => r.VideoMovieId == movieId).Select(r => new ReviewDto
-            {
-                ReviewerName = r.ReviewerName,
-                Rating = r.Rating,
-                Comment = r.Comment,
-                MovieTitle = r.VideoMovie != null ? r.VideoMovie.Title : null,
-                MovieYear = r.VideoMovie != null ? r.VideoMovie.Year : null,
-                MovieGenre = r.VideoMovie != null ? r.VideoMovie.Genre.Name : null,
-                MovieDuration = r.VideoMovie != null ? r.VideoMovie.Duration : null
-            }).ToList();
+            var filtered = reviews.Where(r => r.VideoMovieId == movieId)
+                .Skip((page - 1) * pageSize)
+                .Take(pageSize)
+                .Select(r => new ReviewDto
+                {
+                    ReviewerName = r.ReviewerName,
+                    Rating = r.Rating,
+                    Comment = r.Comment,
+                    MovieTitle = r.VideoMovie != null ? r.VideoMovie.Title : null,
+                    MovieYear = r.VideoMovie != null ? r.VideoMovie.Year : null,
+                    MovieGenre = r.VideoMovie != null ? r.VideoMovie.Genre.Name : null,
+                    MovieDuration = r.VideoMovie != null ? r.VideoMovie.Duration : null
+                })
+                .ToList();
             return filtered;
         }
 

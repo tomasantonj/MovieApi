@@ -25,10 +25,17 @@ namespace MovieApi.Controllers
 
         // GET: api/Actors
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<Actor>>> GetActors()
+        public async Task<ActionResult<IEnumerable<Actor>>> GetActors([FromQuery] int page = 1, [FromQuery] int pageSize = 10)
         {
+            pageSize = Math.Min(pageSize, 100);
+            page = Math.Max(page, 1);
+
             var actors = await _actorService.GetActorsAsync();
-            return Ok(actors);
+            var paged = actors
+                .Skip((page - 1) * pageSize)
+                .Take(pageSize)
+                .ToList();
+            return Ok(paged);
         }
 
         // GET: api/Actors/5
